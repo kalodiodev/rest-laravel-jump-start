@@ -21,3 +21,15 @@ $factory->define(App\User::class, function (Faker $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+$factory->define(Laravel\Passport\Client::class, function (Faker $faker) {
+    return [
+        'user_id' => null,
+        'name' => $faker->name,
+        'secret' => str_random(40),
+        'redirect' => 'http://localhost',
+        'personal_access_client' => false,
+        'password_client' => true,
+        'revoked' => false,
+    ];
+});
