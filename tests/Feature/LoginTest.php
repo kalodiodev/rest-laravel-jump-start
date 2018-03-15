@@ -58,4 +58,27 @@ class LoginTest extends TestCase
          $this->assertArrayHasKey('username', $response);
          $this->assertArrayHasKey('password', $response);
      }
+
+     /** @test */
+    public function a_logged_in_user_can_logout()
+    {        
+        $token = $this->postJson('/api/login', [
+            "username" => $this->user->email,
+            "password" => "password"
+        ])->json();
+
+        $response = $this->postJson('/api/logout', [], [
+            'Authorization' => $token['token_type'] . ' ' . $token['access_token']
+        ])->assertStatus(204);
+    }
+
+    /** @test */
+    public function a_guest_user_cannot_logout()
+    {
+        $response = $this->postJson('/api/logout')
+            ->assertStatus(401)
+            ->json();
+        
+        $this->assertEquals("Unauthenticated.", $response['message']);
+    }
 }

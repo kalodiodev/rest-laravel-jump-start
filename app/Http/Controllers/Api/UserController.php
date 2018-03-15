@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use Laravel\Passport\Client;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -54,5 +55,18 @@ class UserController extends Controller
         $request = Request::create('oauth/token', 'POST', $params);
 
         return app()->handle($request);
+    }
+
+    public function logout(Request $request)
+    {
+        $token = auth()->user()->token();
+
+        DB::table('oauth_refresh_tokens')
+            ->where('access_token_id', $token->id)
+            ->update(['revoked' => true]);
+
+        $token->revoke();
+
+        return response([], 204);
     }
 }
