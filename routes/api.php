@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 
 Route::post('register', 'Api\UserController@register');
 Route::post('login', 'Api\UserController@login');
+Route::post('email','Auth\ForgotPasswordController@sendResetLinkEmail');
 
 Route::group(['middleware' => 'auth:api'], function() {
     Route::post('logout', 'Api\UserController@logout');
