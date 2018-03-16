@@ -36,4 +36,38 @@ class ForgotPasswordTest extends TestCase
 
         $this->assertEquals('Reset password email sent.', $response['message']);
     }
+
+    /** @test */
+    public function a_user_can_reset_password()
+    {
+        Notification::fake();
+
+        $this->postJson('/api/email', ['email' => $this->user->email]);
+        $resetToken = '';
+
+        Notification::assertSentTo(
+            $this->user,
+            \App\Notifications\ResetPassword::class,
+            function ($notification, $channels) use (&$resetToken) {
+                $resetToken = $notification->token;
+                return true;
+            });
+        
+        $response = $this->postJson('/api/reset?token=' . $resetToken, [
+            'email' => $this->user->email,
+            'password' => '123456',
+            'password_confirmation' => '123456'
+        ])->assertStatus(200)->json();
+    }
+
+    /** @test */
+    public function a_user_cannot_reset_password_with_invalid_data()
+    {
+        $response = $this->postJson("/api/reset?token=anytoken", [
+            ])->assertStatus(422)->json();
+
+        $this->assertEquals("The given data was invalid.", $response['message']);
+        $this->assertEquals("The email field is required.", $response['errors']['email'][0]);
+        $this->assertEquals("The password field is required.", $response['errors']['password'][0]);
+    }
 }
