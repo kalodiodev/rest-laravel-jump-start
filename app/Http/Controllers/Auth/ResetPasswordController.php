@@ -36,24 +36,4 @@ class ResetPasswordController extends Controller
     {
         $this->middleware('guest');
     }
-
-    /**
-    * Send password change success response
-    */
-    protected function sendResetResponse($response)
-    {
-        return response()->json([
-            'message' => 'Password changed!'
-        ], 200);
-    }
-
-    /**
-     * Send password change fail response
-     */
-    protected function sendResetFailedResponse(Request $request, $response)
-    {
-        return response()->json([
-            'message' => 'Failed to change password'
-        ], 400);
-    }
 }
