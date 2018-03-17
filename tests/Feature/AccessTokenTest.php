@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use Laravel\Passport\Client;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Passport\Client;
 
 class AccessTokenTest extends TestCase
 {
@@ -20,7 +20,7 @@ class AccessTokenTest extends TestCase
         factory(Client::class, 2)->create();
 
         $this->user = factory(\App\User::class)->create([
-            "password" => bcrypt("password")
+            'password' => bcrypt('password')
         ]);
     }
 
@@ -28,8 +28,8 @@ class AccessTokenTest extends TestCase
     public function a_registered_user_can_get_access_token()
     {
         $response = $this->postJson('/api/access', [
-            "username" => $this->user->email,
-            "password" => "password"
+            'username' => $this->user->email,
+            'password' => 'password'
         ])->assertStatus(200)->json();
 
         $this->assertArrayHasKey('access_token', $response);
@@ -40,8 +40,8 @@ class AccessTokenTest extends TestCase
      public function a_non_registered_user_cannot_get_access_token()
      {
          $response = $this->postJson('/api/access', [
-             "username" => 'guest@example.com',
-             "password" => "123456"
+             'username' => 'guest@example.com',
+             'password' => '123456'
          ])->assertStatus(401)->json();
  
          $this->assertArrayHasKey('error', $response);
@@ -51,8 +51,8 @@ class AccessTokenTest extends TestCase
      public function a_user_cannot_get_access_token_with_invalid_credentials()
      {
          $response = $this->postJson('/api/access', [
-             "username" => "",
-             "password" => "test"
+             'username' => '',
+             'password' => 'test'
          ])->assertStatus(422)->json('errors');
 
          $this->assertArrayHasKey('username', $response);
@@ -63,8 +63,8 @@ class AccessTokenTest extends TestCase
     public function a_user_with_access_token_can_revoke_token()
     {        
         $token = $this->postJson('/api/access', [
-            "username" => $this->user->email,
-            "password" => "password"
+            'username' => $this->user->email,
+            'password' => 'password'
         ])->json();
 
         $response = $this->postJson('/api/revoke', [], [
@@ -80,5 +80,22 @@ class AccessTokenTest extends TestCase
             ->json();
         
         $this->assertEquals("Unauthenticated.", $response['message']);
+    }
+
+    /** @test */
+    public function a_user_with_refresh_token_can_refresh_access_token()
+    {
+        $token = $this->postJson('/api/access', [
+            'username' => $this->user->email,
+            'password' => 'password'
+        ])->json();
+
+        $response = $this->postJson('/api/refresh', [
+            'refresh_token' => $token['refresh_token']
+        ])->assertStatus(200)->json();
+
+        $this->assertArrayHasKey('access_token', $response);
+        $this->assertArrayHasKey('refresh_token', $response);
+        $this->assertNotEquals($token, $response['access_token']);
     }
 }

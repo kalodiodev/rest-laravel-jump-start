@@ -49,4 +49,20 @@ class AccessTokenController extends Controller
 
         return response([], 204);
     }
+
+    public function refresh(Request $request)
+    {
+        $params = [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $request->refresh_token,
+            'client_id' => $this->client->id,
+            'client_secret' => $this->client->secret,
+            'scope' => '*',
+        ];
+
+        $request = Request::create('oauth/token', 'POST', $params);
+        $response = app()->handle($request);
+
+        return $response;
+    }
 }
