@@ -14,10 +14,10 @@ use Illuminate\Http\Request;
 */
 
 Route::post('register', 'Auth\Api\RegisterController@register');
-Route::post('login', 'Api\UserController@login');
+Route::post('access', 'Auth\Api\AccessTokenController@access');
 Route::post('email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
 Route::post('reset', 'Auth\ResetPasswordController@reset')->name('password.reset');
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::post('logout', 'Api\UserController@logout');
+    Route::post('revoke', 'Auth\Api\AccessTokenController@revoke');
 });

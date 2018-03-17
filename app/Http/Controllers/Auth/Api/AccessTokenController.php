@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Auth\Api;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\User;
 use Laravel\Passport\Client;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
-class UserController extends Controller
+class AccessTokenController extends Controller
 {
     private $client;
 
@@ -17,7 +16,7 @@ class UserController extends Controller
         $this->client = Client::find(2);
     }
 
-    public function login(Request $request)
+    public function access(Request $request)
     {
         $this->validate($request, [
             'username' => 'required|email',
@@ -38,7 +37,7 @@ class UserController extends Controller
         return app()->handle($request);
     }
 
-    public function logout(Request $request)
+    public function revoke(Request $request)
     {
         $token = auth()->user()->token();
 
