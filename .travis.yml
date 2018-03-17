@@ -9,6 +9,7 @@ before_script:
   - composer install --no-interaction
   - php artisan key:generate
   - touch restlaravel.sqlite
+  - php artisan migrate
   - php artisan passport:install
 
 script:
