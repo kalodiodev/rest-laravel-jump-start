@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('register', 'Api\UserController@register');
+Route::post('register', 'Auth\Api\RegisterController@register');
 Route::post('login', 'Api\UserController@login');
 Route::post('email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
 Route::post('reset', 'Auth\ResetPasswordController@reset')->name('password.reset');

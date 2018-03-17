@@ -17,25 +17,6 @@ class UserController extends Controller
         $this->client = Client::find(2);
     }
 
-    public function register(Request $request)
-    {
-        $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed'
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
-        ]);
-
-        return response()->json([
-            "message" => "Successfully registered user!"
-        ], 201);
-    }
-
     public function login(Request $request)
     {
         $this->validate($request, [
