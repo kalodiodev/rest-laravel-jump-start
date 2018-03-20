@@ -42,4 +42,13 @@ class RegisterController extends Controller
             'message' => 'Successfully created user!'
         ], 201);
     }
+
+    public function destroy()
+    {
+        auth()->user()->delete();
+
+        return response()->json([
+            'message' => 'User successfully deleted'
+        ], 200);
+    }
 }

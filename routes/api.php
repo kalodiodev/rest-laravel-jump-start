@@ -20,5 +20,6 @@ Route::post('reset', 'Auth\Api\ResetPasswordController@reset')->name('password.r
 Route::post('refresh', 'Auth\Api\AccessTokenController@refresh');
 
 Route::group(['middleware' => 'auth:api'], function() {
+    Route::delete('delete', 'Auth\Api\RegisterController@destroy');
     Route::post('revoke', 'Auth\Api\AccessTokenController@revoke');
 });
