@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class RegisterTest extends TestCase
 {
@@ -56,6 +58,29 @@ class RegisterTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user1->id ]);
         $this->assertDatabaseHas('users', ['id' => $user2->id]);
         $this->assertEquals('User successfully deleted', $response['message']);
+    }
+
+    /** @test */
+    public function when_user_deletes_account_tokens_should_also_be_deleted()
+    {
+        factory(\Laravel\Passport\Client::class, 2)->create();
+        $user = factory(\App\User::class)->create(['password' => Hash::make('password')]);
+        
+        $params = [
+            'username' => $user->email,
+            'password' => 'password'
+        ];
+
+        // Creating two access tokens for user
+        $this->postJson('/api/access', $params);
+        $token = $this->postJson('/api/access', $params)->json('access_token');
+
+        $headers = ['Authorization' => 'Bearer ' . $token];
+        $this->deleteJson('/api/delete',[], $headers)
+            ->assertStatus(200);
+
+        $this->assertEquals(0 , DB::table('oauth_access_tokens')->count());
+        $this->assertEquals(0, DB::table('oauth_refresh_tokens')->count());
     }
 
     /** @test */

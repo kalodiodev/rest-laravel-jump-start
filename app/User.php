@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -28,6 +29,22 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($user) {
+            // When deleting user also delete tokens belong to user
+            $user->tokens->each(function($token) {
+                DB::table('oauth_refresh_tokens')
+                    ->where('access_token_id', $token->id)
+                    ->delete();
+
+                $token->delete();
+            });
+        });
+    }
 
     /**
      * Send the reset password notification
