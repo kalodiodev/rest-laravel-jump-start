@@ -26,7 +26,7 @@ class ForgotPasswordTest extends TestCase
     {
         Notification::fake();
 
-        $response = $this->postJson('/api/email', [
+        $response = $this->postJson(route('api.password.forgot'), [
             'email' => $this->user->email
         ])->assertStatus(200)->json();
 
@@ -42,7 +42,10 @@ class ForgotPasswordTest extends TestCase
     {
         Notification::fake();
 
-        $this->postJson('/api/email', ['email' => $this->user->email]);
+        $this->postJson(route('api.password.forgot'), [
+                'email' => $this->user->email
+            ]
+        );
         $resetToken = '';
 
         Notification::assertSentTo(
@@ -53,21 +56,33 @@ class ForgotPasswordTest extends TestCase
                 return true;
             });
         
-        $response = $this->postJson('/api/reset?token=' . $resetToken, [
-            'email' => $this->user->email,
-            'password' => '123456',
-            'password_confirmation' => '123456'
-        ])->assertStatus(200)->json();
+        $response = $this->postJson(
+            route('api.password.reset', ['token' => $resetToken]), [
+                'email' => $this->user->email,
+                'password' => '123456',
+                'password_confirmation' => '123456'
+            ]
+        )->assertStatus(200)->json();
     }
 
     /** @test */
     public function a_user_cannot_reset_password_with_invalid_data()
     {
-        $response = $this->postJson("/api/reset?token=anytoken", [
-            ])->assertStatus(422)->json();
+        $response = $this->postJson(
+            route('api.password.reset', ['token' => 'anytoken']), 
+            []
+        )->assertStatus(422)->json();
 
-        $this->assertEquals("The given data was invalid.", $response['message']);
-        $this->assertEquals("The email field is required.", $response['errors']['email'][0]);
-        $this->assertEquals("The password field is required.", $response['errors']['password'][0]);
+        $this->assertEquals(
+            "The given data was invalid.", 
+            $response['message']);
+
+        $this->assertEquals(
+            "The email field is required.", 
+            $response['errors']['email'][0]);
+            
+        $this->assertEquals(
+            "The password field is required.", 
+            $response['errors']['password'][0]);
     }
 }

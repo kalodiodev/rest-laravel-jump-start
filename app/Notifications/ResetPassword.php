@@ -44,7 +44,7 @@ class ResetPassword extends Notification
     {
         return (new MailMessage)
             ->line('You are receiving this email because we received a password reset request for your account.')
-            ->action('Reset Password:', url('/') . '/password/reset/' . $this->token)
+            ->action('Reset Password:', route('api.password.reset') . '/'  . $this->token)
             ->line('Thank you for using our application!');
     }
 

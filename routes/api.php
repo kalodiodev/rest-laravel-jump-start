@@ -13,13 +13,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('register', 'Auth\Api\RegisterController@register');
-Route::post('access', 'Auth\Api\AccessTokenController@access');
-Route::post('email', 'Auth\Api\ForgotPasswordController@sendResetLinkEmail');
-Route::post('reset', 'Auth\Api\ResetPasswordController@reset')->name('password.reset');
-Route::post('refresh', 'Auth\Api\AccessTokenController@refresh');
+Route::post('register', 'Auth\Api\RegisterController@register')->name('api.register');
+Route::post('access', 'Auth\Api\AccessTokenController@access')->name('api.access');
+Route::post('email', 'Auth\Api\ForgotPasswordController@sendResetLinkEmail')->name('api.password.forgot');
+Route::post('reset', 'Auth\Api\ResetPasswordController@reset')->name('api.password.reset');
+Route::post('refresh', 'Auth\Api\AccessTokenController@refresh')->name('api.token.refresh');
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::delete('delete', 'Auth\Api\RegisterController@destroy');
-    Route::post('revoke', 'Auth\Api\AccessTokenController@revoke');
+    Route::delete('delete', 'Auth\Api\RegisterController@destroy')->name('api.deregister');
+    Route::post('revoke', 'Auth\Api\AccessTokenController@revoke')->name('api.token.revoke');
 });

@@ -15,7 +15,7 @@ class RegisterTest extends TestCase
     /** @test */
     public function a_user_can_register()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson(route('api.register'), [
             "name" => "John Doe",
             "email" => "test@example.com",
             "password" => "password",
@@ -31,7 +31,7 @@ class RegisterTest extends TestCase
     /** @test */
     public function a_user_cannot_register_with_invalid_data()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson(route('api.register'), [
             "name" => "",
             "email" => "",
             "password" => "",
@@ -51,7 +51,7 @@ class RegisterTest extends TestCase
 
         \Laravel\Passport\Passport::actingAs($user1);
                 
-        $response = $this->deleteJson('/api/delete')
+        $response = $this->deleteJson(route('api.deregister'))
             ->assertStatus(200)
             ->json();
 
@@ -72,11 +72,12 @@ class RegisterTest extends TestCase
         ];
 
         // Creating two access tokens for user
-        $this->postJson('/api/access', $params);
-        $token = $this->postJson('/api/access', $params)->json('access_token');
+        $this->postJson(route('api.access'), $params);
+        $token = $this->postJson(route('api.access'), $params)
+            ->json('access_token');
 
         $headers = ['Authorization' => 'Bearer ' . $token];
-        $this->deleteJson('/api/delete',[], $headers)
+        $this->deleteJson(route('api.deregister'),[], $headers)
             ->assertStatus(200);
 
         $this->assertEquals(0 , DB::table('oauth_access_tokens')->count());
@@ -88,7 +89,7 @@ class RegisterTest extends TestCase
     {
         factory(\App\User::class, 3)->create();
 
-        $response = $this->deleteJson('/api/delete')
+        $response = $this->deleteJson(route('api.deregister'))
             ->assertStatus(401);
 
         $this->assertCount(3, \App\User::all());
