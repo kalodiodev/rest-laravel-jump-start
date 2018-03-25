@@ -43,8 +43,9 @@ class EmailVerification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
+                    ->line('Email Verification for ' . config('app.name') . '.')
+                    ->action('Verify Email', 
+                        route('api.email.verify') . '/' . $this->token)
                     ->line('Thank you for using our application!');
     }
 
