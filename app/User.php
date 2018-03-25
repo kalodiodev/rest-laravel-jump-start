@@ -2,8 +2,8 @@
 
 namespace App;
 
+use App\Events\UserDeleted;
 use Laravel\Passport\HasApiTokens;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\EmailVerification;
 use Illuminate\Notifications\Notifiable;
@@ -33,6 +33,20 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * The event map for the model.
+     * 
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        'deleted' => UserDeleted::class,
+    ];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
@@ -43,17 +57,6 @@ class User extends Authenticatable
 
         static::creating(function($user) {
             $user->verification_token = str_random(40);
-        });
-
-        static::deleting(function($user) {
-            // When deleting user also delete tokens belong to user
-            $user->tokens->each(function($token) {
-                DB::table('oauth_refresh_tokens')
-                    ->where('access_token_id', $token->id)
-                    ->delete();
-
-                $token->delete();
-            });
         });
     }
 
