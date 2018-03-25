@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Events\UserDeleted;
+use App\Observers\UserObserver;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\EmailVerification;
@@ -10,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
+
 
 class User extends Authenticatable
 {
@@ -51,13 +53,7 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        static::created(function($user) {
-            $user->sendEmailVerificationNotification();
-        });
-
-        static::creating(function($user) {
-            $user->verification_token = str_random(40);
-        });
+        User::observe(UserObserver::class);
     }
 
     /**
