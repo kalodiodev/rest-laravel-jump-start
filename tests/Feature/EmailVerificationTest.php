@@ -20,11 +20,16 @@ class EmailVerificationTest extends TestCase
         'password_confirmation' => 'password'
     ];
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        Notification::fake();
+    }
+
     /** @test */
     public function when_user_registers_a_notification_with_verification_link_is_sent()
     {
-        Notification::fake();
-
         $this->postJson(route('api.register'), $this->user_register_data)
             ->assertStatus(201);
 
@@ -42,5 +47,56 @@ class EmailVerificationTest extends TestCase
             });
         
         $this->assertEquals($user->verification_token, $verificationToken);
+    }
+
+    /** @test */
+    public function user_with_verification_token_can_be_verified()
+    {
+        $user = factory(\App\User::class)->create([
+            'verified' => false, 'verification_token' => str_random(40)
+        ]);
+
+        $verificationToken = '';
+
+        Notification::assertSentTo(
+            $user, 
+            EmailVerification::class, 
+            function ($notification, $channels) use (&$verificationToken) {
+                $verificationToken = $notification->token;
+                return true;
+            });
+
+        $response = $this->getJson(route('api.email.verify', ['token' => $verificationToken]))
+            ->assertStatus(200)
+            ->json();
+        
+        $this->assertEquals('Email successfully verified.', $response['message']);
+        $this->assertTrue($user->fresh()->isVerified());
+       // $this->assertEquals("", $user->verification_token);
+    }
+
+    /** @test */
+    public function a_user_cannot_be_verified_with_invalid_token()
+    {
+        $user = factory(\App\User::class)->create([
+            'verified' => false, 'verification_token' => str_random(40)
+        ]);
+
+        $verificationToken = '';
+
+        Notification::assertSentTo(
+            $user, 
+            EmailVerification::class, 
+            function ($notification, $channels) use (&$verificationToken) {
+                $verificationToken = $notification->token;
+                return true;
+            });
+
+        $response = $this->getJson(route('api.email.verify', ['token' => 'any token']))
+            ->assertStatus(404)
+            ->json();
+        
+        $this->assertEquals('invalid_token', $response['error']);
+        $this->assertEquals('Email cannot be identified.', $response['message']);
     }
 }

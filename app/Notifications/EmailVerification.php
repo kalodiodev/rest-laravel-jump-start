@@ -45,7 +45,7 @@ class EmailVerification extends Notification
         return (new MailMessage)
                     ->line('Email Verification for ' . config('app.name') . '.')
                     ->action('Verify Email', 
-                        route('api.email.verify') . '/' . $this->token)
+                        route('api.email.verify', ['token' => $this->token]))
                     ->line('Thank you for using our application!');
     }
 
