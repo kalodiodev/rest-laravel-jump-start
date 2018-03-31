@@ -48,6 +48,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if(($exception instanceof NotFoundHttpException) && ($request->expectsJson())) {
+            return response()->json([
+                'error' => 'not_found',
+                'message' => 'The specified URL could not be found'
+            ], 404);
+        }
+
         return parent::render($request, $exception);
     }
 }
