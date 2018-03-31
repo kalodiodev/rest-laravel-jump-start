@@ -55,6 +55,14 @@ class Handler extends ExceptionHandler
             ], 404);
         }
 
+        if(($exception instanceof ModelNotFoundException) && ($request->expectsJson())) {
+            $modelName = strtolower(class_basename($exception->getModel()));
+            return response()->json([
+                'error' => 'not_found',
+                'message' => "Could not find {$modelName}"
+            ], 404);
+        }
+
         return parent::render($request, $exception);
     }
 }
