@@ -23,4 +23,5 @@ Route::get('verify/{token}', 'Auth\Api\EmailVerificationController@verify')->nam
 Route::group(['middleware' => 'auth:api'], function() {
     Route::delete('delete', 'Auth\Api\RegisterController@destroy')->name('api.deregister');
     Route::post('revoke', 'Auth\Api\AccessTokenController@revoke')->name('api.token.revoke');
+    Route::patch('update', 'UserController@update')->name('api.update');
 });
