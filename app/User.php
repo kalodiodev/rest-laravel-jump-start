@@ -100,4 +100,9 @@ class User extends Authenticatable
     {
         return Hash::check($password, $this->password);
     }
+
+    public static function generateVerificationCode()
+    {
+        return str_random(40);
+    }
 }

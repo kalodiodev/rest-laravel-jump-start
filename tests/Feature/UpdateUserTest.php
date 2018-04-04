@@ -64,4 +64,22 @@ class UpdateUserTest extends TestCase
         $response = $this->patchJson(route('api.update'), $this->data)
             ->assertStatus(401);
     }
+
+    /** @test */
+    public function when_user_updates_email_a_new_verification_is_required()
+    {
+        Passport::actingAs($this->user);
+
+        $response = $this->patchJson(route('api.update'), [
+            'email' => $this->data['email']
+        ])->assertStatus(200);
+
+        $this->assertFalse($this->user->isVerified());
+        $this->assertNotNull($this->user->verification_token);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'verified' => 0
+        ]);
+    }
 }
