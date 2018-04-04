@@ -42,4 +42,17 @@ class UserObserver
             $user->verification_token = User::generateVerificationCode();
         }
     }
+
+    /**
+     * Listen to the User updated event.
+     * 
+     * @param \App\User $user
+     * @return void
+     */
+    public function updated(User $user)
+    {
+        if($user->isDirty('email')) {
+            $user->sendEmailVerificationNotification();
+        }   
+    }
 }

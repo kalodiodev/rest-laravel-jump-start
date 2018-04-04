@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\User;
 use Tests\TestCase;
 use Laravel\Passport\Passport;
+use App\Notifications\EmailVerification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -81,5 +83,18 @@ class UpdateUserTest extends TestCase
             'id' => $this->user->id,
             'verified' => 0
         ]);
+    }
+
+    /** @test */
+    public function when_user_updates_email_a_new_verification_notification_is_sent()
+    {
+        Passport::actingAs($this->user);
+        Notification::fake();
+
+        $response = $this->patchJson(route('api.update'), [
+            'email' => $this->data['email']
+        ])->assertStatus(200);
+
+        Notification::assertSentTo($this->user, EmailVerification::class);
     }
 }
