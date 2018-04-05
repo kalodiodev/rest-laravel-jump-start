@@ -19,6 +19,7 @@ Route::post('email', 'Auth\Api\ForgotPasswordController@sendResetLinkEmail')->na
 Route::post('reset', 'Auth\Api\ResetPasswordController@reset')->name('api.password.reset');
 Route::post('refresh', 'Auth\Api\AccessTokenController@refresh')->name('api.token.refresh');
 Route::get('verify/{token}', 'Auth\Api\EmailVerificationController@verify')->name('api.email.verify');
+Route::post('resend', 'Auth\Api\EmailVerificationController@resend')->name('api.verification.resend');
 
 Route::group(['middleware' => 'auth:api'], function() {
     Route::delete('delete', 'Auth\Api\RegisterController@destroy')->name('api.deregister');

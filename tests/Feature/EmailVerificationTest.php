@@ -20,16 +20,11 @@ class EmailVerificationTest extends TestCase
         'password_confirmation' => 'password'
     ];
 
-    public function setUp()
-    {
-        parent::setUp();
-
-        Notification::fake();
-    }
-
     /** @test */
     public function when_user_registers_a_notification_with_verification_link_is_sent()
     {
+        Notification::fake();
+
         $this->postJson(route('api.register'), $this->user_register_data)
             ->assertStatus(201);
 
@@ -52,6 +47,8 @@ class EmailVerificationTest extends TestCase
     /** @test */
     public function user_with_verification_token_can_be_verified()
     {
+        Notification::fake();
+
         $user = factory(\App\User::class)->create([
             'verified' => false, 'verification_token' => str_random(40)
         ]);
@@ -78,6 +75,8 @@ class EmailVerificationTest extends TestCase
     /** @test */
     public function a_user_cannot_be_verified_with_invalid_token()
     {
+        Notification::fake();
+
         $user = factory(\App\User::class)->create([
             'verified' => false, 'verification_token' => str_random(40)
         ]);
@@ -98,5 +97,37 @@ class EmailVerificationTest extends TestCase
         
         $this->assertEquals('invalid_token', $response['error']);
         $this->assertEquals('Email cannot be identified.', $response['message']);
+    }
+
+    /** @test */
+    public function a_user_can_request_to_resend_verification_token()
+    {
+        $user = factory(\App\User::class)->create([
+            'verified' => false, 'verification_token' => str_random(40)
+        ]);
+
+        Notification::fake();
+
+        $response = $this->postJson(route('api.verification.resend', [
+            'email' => $user->email
+        ]))->assertStatus(200)->json();
+
+        Notification::assertSentTo($user, EmailVerification::class);
+    }
+
+    /** @test */
+    public function a_verified_user_cannot_request_a_verification_token_resend()
+    {
+        $user = factory(\App\User::class)->create([
+            'verified' => true, 'verification_token' => null
+        ]);
+
+        Notification::fake();
+
+        $response = $this->postJson(route('api.verification.resend', [
+            'email' => $user->email
+        ]))->assertStatus(409)->json();
+
+        Notification::assertNotSentTo($user, EmailVerification::class);
     }
 }

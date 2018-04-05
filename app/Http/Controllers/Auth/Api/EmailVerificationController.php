@@ -25,4 +25,17 @@ class EmailVerificationController extends Controller
             'message' => 'Email cannot be identified.'
         ], 404);
     }
+
+    public function resend(Request $request)
+    {
+        $user = User::where('email', $request->email)->firstOrFail();
+
+        if($user->isVerified()) {
+            return response()->json(['message' => 'User already verified.'], 409);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification token resent.'], 200);
+    }
 }
